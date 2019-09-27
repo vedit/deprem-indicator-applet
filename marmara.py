@@ -74,6 +74,7 @@ def is_new(eq):
     if os.path.isfile(hashfile_path):
         f = open(hashfile_path, "r")
         last_hash_result = f.read()
+        f.close()
         if last_hash_result.strip() != cur_hash_result.strip():
             print last_hash_result
             print cur_hash_result
