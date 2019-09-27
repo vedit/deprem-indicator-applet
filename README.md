@@ -1,0 +1,1 @@
+# deprem-indicator-applet
