@@ -28,7 +28,7 @@ def main():
 
 def build_menu():
     menu = gtk.Menu()
-    item_last_eq = gtk.MenuItem('Last Earth Quake')
+    item_last_eq = gtk.MenuItem('Last Marmara Earth Quake')
     item_last_eq.connect('activate', last_eq_menu)
     menu.append(item_last_eq)
     item_eq_stats = gtk.MenuItem('Marmara Earth Quake Stats')
@@ -56,7 +56,7 @@ def median(lst):
 
 
 def format_eq(eq):
-    formatted = eq[6] + " Earth Quake at " + eq[1]
+    formatted = "%s Earth Quake at %s %s" % (eq[6], eq[0], eq[1])
     return formatted
 
 
@@ -70,9 +70,7 @@ def fetch_eq_stats():
     num = len(eqs)
     highest = max(float(eq[6]) for eq in eqs)
     med = median([float(eq[6]) for eq in eqs])
-    print num
-    print highest
-    return "%d earth quakes from last 500 <br> Highest: %s, Median: %s" % (num, highest, med)
+    return "%d earth quakes are on Marmara from the last 500 <br> Highest: %s, Median: %s" % (num, highest, med)
 
 
 def get_new_eq():
@@ -81,22 +79,19 @@ def get_new_eq():
         time.sleep(delay)
         eq = fetch_last_eq()
         if is_new(eq):
-            print eq
             new_eq_notification(eq)
 
 
 def is_new(eq):
     is_new = False
     home = os.path.expanduser("~")
-    hashfile_path = home + "/.config/lateseqhash"
+    hashfile_path = home + "/.config/latesteqhash"
     cur_hash_result = hashlib.md5(str.encode(eq)).hexdigest()
     if os.path.isfile(hashfile_path):
         f = open(hashfile_path, "r")
         last_hash_result = f.read()
         f.close()
         if last_hash_result.strip() != cur_hash_result.strip():
-            # print last_hash_result
-            # print cur_hash_result
             is_new = True
     else:
         is_new = True
@@ -108,7 +103,7 @@ def is_new(eq):
 
 
 def new_eq_notification(eq):
-    notify.Notification.new("<b>Last EQ</b>", eq, None).show()
+    notify.Notification.new("<b>New EQ</b>", eq, None).show()
 
 
 def last_eq_menu(_):
