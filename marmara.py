@@ -31,6 +31,9 @@ def build_menu():
     item_last_eq = gtk.MenuItem('Last Earth Quake')
     item_last_eq.connect('activate', last_eq_menu)
     menu.append(item_last_eq)
+    item_eq_stats = gtk.MenuItem('Marmara Earth Quake Stats')
+    item_eq_stats.connect('activate', eq_stats_menu)
+    menu.append(item_eq_stats)
     item_quit = gtk.MenuItem('Quit')
     item_quit.connect('activate', quit)
     menu.append(item_quit)
@@ -46,14 +49,30 @@ def fetch_all_eqs():
     return eqs
 
 
+def median(lst):
+    n = len(lst)
+    s = sorted(lst)
+    return (sum(s[n//2-1:n//2+1])/2.0, s[n//2])[n % 2] if n else None
+
+
 def format_eq(eq):
     formatted = eq[6] + " Earth Quake at " + eq[1]
     return formatted
 
 
 def fetch_last_eq():
-    eq = fetch_all_eqs()
-    return format_eq(eq[0])
+    eqs = fetch_all_eqs()
+    return format_eq(eqs[0])
+
+
+def fetch_eq_stats():
+    eqs = fetch_all_eqs()
+    num = len(eqs)
+    highest = max(float(eq[6]) for eq in eqs)
+    med = median([float(eq[6]) for eq in eqs])
+    print num
+    print highest
+    return "%d earth quakes from last 500 <br> Highest: %s, Median: %s" % (num, highest, med)
 
 
 def get_new_eq():
@@ -76,8 +95,8 @@ def is_new(eq):
         last_hash_result = f.read()
         f.close()
         if last_hash_result.strip() != cur_hash_result.strip():
-            print last_hash_result
-            print cur_hash_result
+            # print last_hash_result
+            # print cur_hash_result
             is_new = True
     else:
         is_new = True
@@ -94,6 +113,10 @@ def new_eq_notification(eq):
 
 def last_eq_menu(_):
     notify.Notification.new("<b>Last EQ</b>", fetch_last_eq(), None).show()
+
+
+def eq_stats_menu(_):
+    notify.Notification.new("<b>EQ Stats</b>", fetch_eq_stats(), None).show()
 
 
 def quit(_):
