@@ -5,6 +5,8 @@ import rumps
 import logging
 import traceback
 import subprocess
+import plistlib
+from pathlib import Path
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,14 +26,82 @@ class MarmaraDepremApp(rumps.App):
                 rumps.MenuItem("Son Deprem", callback=self.last_eq_menu),
                 rumps.MenuItem("Deprem İstatistikleri", callback=self.eq_stats_menu),
                 None,  # Separator
+                rumps.MenuItem("Başlangıçta Başlat", callback=self.toggle_startup),
                 rumps.MenuItem("Bildirim Testi", callback=self.test_notification),
             ]
             self.update_thread = None
+            self.startup_item = self.menu["Başlangıçta Başlat"]
+            self.update_startup_state()
             self.check_notification_permissions()
             logger.info("Application initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize application: {str(e)}")
             logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
+
+    def get_login_items_path(self):
+        """Get the path to the login items plist file"""
+        home = str(Path.home())
+        return os.path.join(home, "Library", "LaunchAgents", "com.marmara.deprem.plist")
+
+    def is_startup_enabled(self):
+        """Check if the app is set to start at login"""
+        plist_path = self.get_login_items_path()
+        return os.path.exists(plist_path)
+
+    def update_startup_state(self):
+        """Update the menu item state based on current startup setting"""
+        self.startup_item.state = 1 if self.is_startup_enabled() else 0
+
+    def toggle_startup(self, sender):
+        """Toggle startup at login"""
+        try:
+            if self.is_startup_enabled():
+                self.disable_startup()
+            else:
+                self.enable_startup()
+            self.update_startup_state()
+        except Exception as e:
+            logger.error(f"Error toggling startup: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            rumps.alert("Hata", "Başlangıç ayarları değiştirilemedi.")
+
+    def enable_startup(self):
+        """Enable startup at login"""
+        try:
+            plist_path = self.get_login_items_path()
+            app_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "dist", "Marmara Deprem.app")
+            )
+
+            plist_content = {
+                "Label": "com.marmara.deprem",
+                "ProgramArguments": [app_path],
+                "RunAtLoad": True,
+                "KeepAlive": False,
+            }
+
+            # Create directory if it doesn't exist
+            os.makedirs(os.path.dirname(plist_path), exist_ok=True)
+
+            # Write the plist file
+            with open(plist_path, "wb") as f:
+                plistlib.dump(plist_content, f)
+
+            logger.info("Startup enabled successfully")
+        except Exception as e:
+            logger.error(f"Error enabling startup: {str(e)}")
+            raise
+
+    def disable_startup(self):
+        """Disable startup at login"""
+        try:
+            plist_path = self.get_login_items_path()
+            if os.path.exists(plist_path):
+                os.remove(plist_path)
+            logger.info("Startup disabled successfully")
+        except Exception as e:
+            logger.error(f"Error disabling startup: {str(e)}")
             raise
 
     def check_notification_permissions(self):
