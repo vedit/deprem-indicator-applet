@@ -1,17 +1,13 @@
 import os
-import signal
 import hashlib
-import time
 import requests
 import rumps
-from datetime import datetime
 import logging
 import traceback
 import subprocess
-import platform
 
 logging.basicConfig(
-    level=logging.INFO,  
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
@@ -21,7 +17,9 @@ logger = logging.getLogger(__name__)
 class MarmaraDepremApp(rumps.App):
     def __init__(self):
         try:
-            super(MarmaraDepremApp, self).__init__("Deprem")
+            # Use the generated icon.png for the menu bar
+            self.icon_path = "icon.png" if os.path.exists("icon.png") else None
+            super(MarmaraDepremApp, self).__init__("Deprem", icon=self.icon_path)
             self.menu = [
                 rumps.MenuItem("Son Deprem", callback=self.last_eq_menu),
                 rumps.MenuItem("Deprem İstatistikleri", callback=self.eq_stats_menu),
@@ -74,11 +72,15 @@ class MarmaraDepremApp(rumps.App):
                 f"Attempting to send notification: {title} - {subtitle} - {message}"
             )
 
-            # Method 1: Using rumps notification
+            # Method 1: Using rumps notification with custom icon
             try:
                 logger.debug("Trying rumps notification...")
                 rumps.notification(
-                    title=title, subtitle=subtitle, message=message, sound=sound
+                    title=title,
+                    subtitle=subtitle,
+                    message=message,
+                    sound=sound,
+                    icon=self.icon_path,
                 )
                 logger.info("Notification sent successfully using rumps")
                 return
@@ -88,9 +90,23 @@ class MarmaraDepremApp(rumps.App):
             # Method 2: Using osascript (macOS native notifications)
             try:
                 logger.debug("Trying osascript notification...")
-                script = f"""
-                display notification "{message}" with title "{title}" subtitle "{subtitle}"
-                """
+                # For osascript, we need to convert the icon to base64
+                if self.icon_path and os.path.exists(self.icon_path):
+                    icon_base64 = (
+                        subprocess.check_output(["base64", self.icon_path])
+                        .decode("utf-8")
+                        .strip()
+                    )
+                    script = f"""
+                    set iconData to "{icon_base64}"
+                    set iconFile to "/tmp/notification_icon.png"
+                    do shell script "echo " & quoted form of iconData & " | base64 -d > " & quoted form of iconFile
+                    display notification "{message}" with title "{title}" subtitle "{subtitle}"
+                    """
+                else:
+                    script = f"""
+                    display notification "{message}" with title "{title}" subtitle "{subtitle}"
+                    """
                 subprocess.run(["osascript", "-e", script], check=True)
                 logger.info("Notification sent successfully using osascript")
                 return
