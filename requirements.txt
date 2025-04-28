@@ -1,5 +1,5 @@
 rumps==0.4.0
-requests==2.31.0
+requests==2.32.2
 py2app==0.28.8
 setuptools==70.3.0
 chardet==5.2.0
