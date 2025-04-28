@@ -15,7 +15,7 @@ An unmaintained Linux GTK version can be found in `gtk` branch
 
 ### From Source
 
-1. Make sure you have Python 3.7+ installed on your system
+1. Make sure you have Python 3.12+ installed on your system
 2. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
@@ -53,7 +53,7 @@ The application will appear in your macOS menu bar. Click on the icon to:
 ## Requirements
 
 - macOS 10.12 or later
-- Python 3.7 or later
+- Python 3.12 or later
 - rumps
 - requests
 - py2app (for building the application)
