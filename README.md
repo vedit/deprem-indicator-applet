@@ -11,6 +11,8 @@ A macOS menu bar application that monitors and displays earthquake information f
 
 ## Installation
 
+### From Source
+
 1. Make sure you have Python 3.7+ installed on your system
 2. Install the required dependencies:
    ```bash
@@ -21,11 +23,29 @@ A macOS menu bar application that monitors and displays earthquake information f
    python marmara.py
    ```
 
+### Building macOS Application
+
+To build a standalone macOS application:
+
+1. Make sure you have the required tools installed:
+   ```bash
+   brew install librsvg
+   ```
+
+2. Run the build script:
+   ```bash
+   chmod +x build_app.sh
+   ./build_app.sh
+   ```
+
+3. The built application will be in the `dist` folder. You can drag it to your Applications folder.
+
 ## Usage
 
 The application will appear in your macOS menu bar. Click on the icon to:
 - View the latest earthquake information
 - Check earthquake statistics
+- Test notifications
 - Quit the application
 
 ## Requirements
@@ -34,6 +54,23 @@ The application will appear in your macOS menu bar. Click on the icon to:
 - Python 3.7 or later
 - rumps
 - requests
+- py2app (for building the application)
+
+## Building from Source
+
+If you want to build the application yourself:
+
+1. Install the build dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Run the build script:
+   ```bash
+   ./build_app.sh
+   ```
+
+The application will be built in the `dist` folder.
 
 ## License
 
