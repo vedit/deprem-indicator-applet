@@ -2,6 +2,8 @@
 
 A macOS menu bar application that monitors and displays earthquake information from the Marmara Sea region.
 
+An unmaintained Linux GTK version can be found in `gtk` branch
+
 ## Features
 
 - Shows the latest earthquake information in the menu bar
